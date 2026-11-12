@@ -6,7 +6,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Check out repository
@@ -24,19 +24,10 @@ jobs:
       - name: Run unit tests
         run: npm test
 
-      - name: Start application
-        run: npm start > server.log 2>&1 &
-
-      - name: Wait for application
-        run: |
-          for i in {1..30}; do
-            if curl --fail --silent http://localhost:5173/health > /dev/null; then
-              exit 0
-            fi
-            sleep 1
-          done
-          cat server.log
-          exit 1
-
       - name: Run end-to-end tests
-        run: npm run test:e2e
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm start
+          wait-on: http://localhost:5173/health
+          wait-on-timeout: 60
+          command: npm run test:e2e
