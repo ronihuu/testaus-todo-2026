@@ -1,19 +1,22 @@
-name: Tests
+name: Automated tests
 
 on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
@@ -24,10 +27,30 @@ jobs:
       - name: Run unit tests
         run: npm test
 
+      - name: Start application
+        run: npm start > server.log 2>&1 &
+
+      - name: Wait for application
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent http://localhost:5173/health; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat server.log
+          exit 1
+
       - name: Run end-to-end tests
-        uses: cypress-io/github-action@v6
+        run: npm run test:e2e
+
+      - name: Upload Cypress artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
         with:
-          start: npm start
-          wait-on: http://localhost:5173/health
-          wait-on-timeout: 60
-          command: npm run test:e2e
+          name: cypress-artifacts
+          path: |
+            cypress/screenshots
+            cypress/videos
+            server.log
+          if-no-files-found: ignore

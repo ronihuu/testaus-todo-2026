@@ -50,7 +50,7 @@ A minimal full-stack JavaScript Todo application intended for learning unit test
 └─ README.md
 ```
 
-### Notes for the testing phase
+### Testing
 
 - Unit tests (Vitest): the functions in `public/taskStore.js` (`createTask`, `updateTask`,
   `toggleTaskCompletion`, `sortTasks`, `escapeHtml`, `statusLabel`, `loadTasks`, `saveTasks`)
@@ -61,3 +61,5 @@ A minimal full-stack JavaScript Todo application intended for learning unit test
   unit test scope.
 - Run tests with `npm test` (single run) or `npm run test:watch` (watch mode).
 - E2E tests (Cypress): target user flows—create, update, complete/undo, delete; use `/health` to check server readiness.
+- Run Cypress tests with `npm run test:e2e`.
+- GitHub Actions runs both `npm test` and `npm run test:e2e` on every push and pull request.
